@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+    <bean id="user" class="com.ioc.logic.entity.Student">
+        <property name="userName" value="juan.yang"/>
+        <property name="sex" value="female"/>
+        <property name="course" ref="course"/>
+    </bean>
+</beans>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mvc-config>
+	<action-mapping namespace="shop">
+		<action requestMapping="/query" class="com.action.ShopAction" method="queryShopList" >
+			<result type="String">/result.jsp</result>
+		</action>
+	</action-mapping>
+</mvc-config>

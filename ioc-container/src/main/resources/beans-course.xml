@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+    <bean id="course" class="com.ioc.logic.entity.Course" lazy-init="true">
+        <property name="mathScore" value="150"/>
+    </bean>
+</beans>
