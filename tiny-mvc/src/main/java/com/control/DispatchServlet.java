@@ -13,8 +13,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -27,7 +30,7 @@ public class DispatchServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        log.info("initializing servlet");
+        //log.info("initializing servlet");
         String contextConfigLocation = this.getInitParameter(CONTEXT_CONFIG_LOCATION);
 
         AbstractReader definitionReader = new XmlDefinitionReader();
@@ -51,12 +54,18 @@ public class DispatchServlet extends HttpServlet {
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) {
         //todo 请求路径解析优化
         String path = req.getRequestURI();
+        try {
+            URL url = new URL(path);
+        } catch (MalformedURLException e) {
+
+        }
         String[] paths = path.split("/");
+        if(paths.length < 2) return;
         String nameSpace = paths[paths.length - 2];
-        String pathPrefix = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+        String pathPrefix = path.substring(path.lastIndexOf("/"));
 
         ActionMapping actionMapping = context.get(nameSpace);
-        ActionDefinitions actionDefinitions = actionMapping.getPropertyValues();
+        ActionDefinitions actionDefinitions = actionMapping.getActionDefinitions();
 
         ActionDefinition actionDefinition = null;
         for (ActionDefinition actionDef : actionDefinitions.getActionDefinitionList()) {
@@ -73,20 +82,30 @@ public class DispatchServlet extends HttpServlet {
     private void handlerRequest(HttpServletRequest req, HttpServletResponse resp, ActionDefinition actionDefinition) {
         String clazzName = actionDefinition.getClazzName();
         String methodName = actionDefinition.getMethodName();
-
+        PrintWriter writer = null;
         try {
             Class clazz = Class.forName(clazzName);
             Object instance = clazz.newInstance();
             Method m = clazz.getMethod(methodName);
-            m.invoke(instance);
-
-            //todo return view
+            Object result = m.invoke(instance);
+            writer = resp.getWriter();
+            writer.write((String) result);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("class not found");
         } catch (NoSuchMethodException e) {
+            throw new RuntimeException("NoSuchMethodException");
         } catch (InstantiationException e) {
+            throw new RuntimeException("InstantiationException");
         } catch (IllegalAccessException e) {
+            throw new RuntimeException("IllegalAccessException");
         } catch (InvocationTargetException e) {
+            throw new RuntimeException("InvocationTargetException");
+        } catch (IOException e) {
+            throw new RuntimeException("IOException");
+        }finally {
+            if(writer != null){
+                writer.close();
+            }
         }
     }
 }

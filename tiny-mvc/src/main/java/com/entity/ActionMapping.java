@@ -5,7 +5,7 @@ package com.entity;
  */
 public class ActionMapping {
     private String nameSpace;
-    private ActionDefinitions propertyValues = new ActionDefinitions();
+    private ActionDefinitions actionDefinitions = new ActionDefinitions();
 
     public String getNameSpace() {
         return nameSpace;
@@ -15,11 +15,11 @@ public class ActionMapping {
         this.nameSpace = nameSpace;
     }
 
-    public ActionDefinitions getPropertyValues() {
-        return propertyValues;
+    public ActionDefinitions getActionDefinitions() {
+        return actionDefinitions;
     }
 
-    public void setPropertyValues(ActionDefinitions propertyValues) {
-        this.propertyValues = propertyValues;
+    public void setActionDefinitions(ActionDefinitions actionDefinitions) {
+        this.actionDefinitions = actionDefinitions;
     }
 }

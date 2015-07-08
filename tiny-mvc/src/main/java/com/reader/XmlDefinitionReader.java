@@ -3,6 +3,7 @@ package com.reader;
 import com.AbstractReader;
 import com.entity.ActionMapping;
 import com.entity.ActionDefinition;
+import com.entity.ResultDefinition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,7 +50,7 @@ public class XmlDefinitionReader extends AbstractReader {
         try {
             db = factory.newDocumentBuilder();
 
-            Document dom = db.parse(this.getClass().getResourceAsStream("/" + location));
+            Document dom = db.parse(location);
             dom.normalize();
             Element root = dom.getDocumentElement();
             NodeList nodeList = root.getChildNodes();
@@ -81,28 +82,45 @@ public class XmlDefinitionReader extends AbstractReader {
         if (ACTION_MAPPING_ELEMENT.equals(curElement.getNodeName())) {
             String nameSpace = curElement.getAttribute(NAMESPACE_ATTRIBUTE);
             actionMapping.setNameSpace(nameSpace);
-            parseActionTag(curElement, actionMapping);
+
+            for (Node curNode = curElement.getFirstChild(); curNode != null; curNode = curNode.getNextSibling()) {
+                if(curNode instanceof Element){
+                    parseActionTag((Element) curNode, actionMapping);
+                }
+            }
             getDefinitionRegister().put(nameSpace,actionMapping);
         }
     }
 
     private void parseActionTag(Element curElement, ActionMapping actionMapping) {
-        if (curElement.getNodeName().equals(ACTION_ELEMENT)) {
+        if (curElement.getNodeType() == Node.ELEMENT_NODE) {
+            if (curElement.getNodeName().equals(ACTION_ELEMENT)) {
 
-            String requestMapping = curElement.getAttribute(REQUEST_MAPPING_ATTRIBUTE);
-            String clazz = curElement.getAttribute(CLASS_ATTRIBUTE);
-            String method = curElement.getAttribute(METHOD_ATTRIBUTE);
+                String requestMapping = curElement.getAttribute(REQUEST_MAPPING_ATTRIBUTE);
+                String clazz = curElement.getAttribute(CLASS_ATTRIBUTE);
+                String method = curElement.getAttribute(METHOD_ATTRIBUTE);
 
-            ActionDefinition actionDefinition = new ActionDefinition(requestMapping, clazz, method);
+                ActionDefinition actionDefinition = new ActionDefinition(requestMapping, clazz, method);
 
-            if(curElement.hasAttribute(RESULT_ELEMENT)){
-                parseResultTag(curElement,actionDefinition);
+                for (Node curNode = curElement.getFirstChild(); curNode != null; curNode = curNode.getNextSibling()) {
+                    if(curNode instanceof Element){
+                        parseResultTag((Element) curNode, actionDefinition);
+                    }
+                }
+                actionMapping.getActionDefinitions().addActionDefinition(actionDefinition);
             }
-            actionMapping.getPropertyValues().addActionDefinition(actionDefinition);
         }
+
     }
 
     private void parseResultTag(Element curElement, ActionDefinition actionDefinition) {
-
+        if (curElement.getNodeType() == Node.ELEMENT_NODE) {
+            if(RESULT_ELEMENT.equals(curElement.getNodeName())){
+                ResultDefinition resultDefinition = new ResultDefinition();
+                resultDefinition.setType(curElement.getAttribute(TYPE_ATTRIBUTE));
+                resultDefinition.setDestination(curElement.getTextContent());
+                actionDefinition.setResult(resultDefinition);
+            }
+        }
     }
 }
