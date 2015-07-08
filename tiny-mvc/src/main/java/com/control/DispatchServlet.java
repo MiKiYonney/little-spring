@@ -30,7 +30,7 @@ public class DispatchServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        //log.info("initializing servlet");
+        log.info("initializing servlet");
         String contextConfigLocation = this.getInitParameter(CONTEXT_CONFIG_LOCATION);
 
         AbstractReader definitionReader = new XmlDefinitionReader();
@@ -54,11 +54,6 @@ public class DispatchServlet extends HttpServlet {
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) {
         //todo 请求路径解析优化
         String path = req.getRequestURI();
-        try {
-            URL url = new URL(path);
-        } catch (MalformedURLException e) {
-
-        }
         String[] paths = path.split("/");
         if(paths.length < 2) return;
         String nameSpace = paths[paths.length - 2];
