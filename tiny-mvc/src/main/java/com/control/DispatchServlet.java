@@ -5,6 +5,7 @@ import com.AbstractReader;
 import com.entity.ActionDefinition;
 import com.entity.ActionDefinitions;
 import com.entity.ActionMapping;
+import com.entity.ResultDefinition;
 import com.reader.XmlDefinitionReader;
 import lombok.extern.log4j.Log4j;
 
@@ -16,8 +17,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -70,21 +69,19 @@ public class DispatchServlet extends HttpServlet {
             }
         }
         //Handler
-        handlerRequest(req, resp, actionDefinition);
+        handleRequest(req, resp, actionDefinition);
 
     }
 
-    private void handlerRequest(HttpServletRequest req, HttpServletResponse resp, ActionDefinition actionDefinition) {
+    private void handleRequest(HttpServletRequest req, HttpServletResponse resp, ActionDefinition actionDefinition) {
         String clazzName = actionDefinition.getClazzName();
         String methodName = actionDefinition.getMethodName();
-        PrintWriter writer = null;
         try {
             Class clazz = Class.forName(clazzName);
             Object instance = clazz.newInstance();
             Method m = clazz.getMethod(methodName);
             Object result = m.invoke(instance);
-            writer = resp.getWriter();
-            writer.write((String) result);
+            handleResponse(resp,actionDefinition.getResult(),result);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("class not found");
         } catch (NoSuchMethodException e) {
@@ -95,6 +92,14 @@ public class DispatchServlet extends HttpServlet {
             throw new RuntimeException("IllegalAccessException");
         } catch (InvocationTargetException e) {
             throw new RuntimeException("InvocationTargetException");
+        }
+    }
+
+    private void handleResponse(HttpServletResponse resp, ResultDefinition resultDefinition, Object result) {
+        PrintWriter writer = null;
+        try {
+            writer = resp.getWriter();
+            writer.write((String) result);
         } catch (IOException e) {
             throw new RuntimeException("IOException");
         }finally {
