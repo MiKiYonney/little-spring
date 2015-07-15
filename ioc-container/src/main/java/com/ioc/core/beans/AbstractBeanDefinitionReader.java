@@ -16,6 +16,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         this.definitionRegister = new HashMap<String, BeanDefinition>();
     }
 
+	
+	//test commit
     public Map<String, BeanDefinition> getDefinitionRegister() {
         return definitionRegister;
     }
